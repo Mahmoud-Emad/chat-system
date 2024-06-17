@@ -10,7 +10,7 @@ This project is an idea about implementing a chat system API `Rails` and `Golang
 
 This project uses `Docker` and `Docker Compose`, make sure that these packages are installed on your machine.
 
-After creating the `.env` file on the main root and adding all of the required env vars:
+After creating the `.env.production` file on the main root and adding all of the required env vars:
 
 ```bash
   docker compose up --build
