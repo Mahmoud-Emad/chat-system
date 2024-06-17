@@ -1,0 +1,66 @@
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - 'db_data:/var/lib/mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: root
+      MYSQL_DATABASE: mysql
+      MYSQL_PASSWORD: password
+    networks:
+      - mynetwork
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+    ports:
+      - '9200:9200'
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - mynetwork
+
+  rails_app:
+    build:
+      context: ./rails_app
+      dockerfile: Dockerfile
+    env_file: ./.env.production
+    command: bash -c "bundle exec rake db:migrate && bundle exec rails s -b '0.0.0.0' -p 8000"
+    volumes:
+      - '.:/myapp'
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+      - elasticsearch
+    networks:
+      - mynetwork
+
+  golang_app:
+    build:
+      context: ./golang_app
+      dockerfile: Dockerfile
+    env_file: ./.env.production
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  db_data:
+  es_data:
